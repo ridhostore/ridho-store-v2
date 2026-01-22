@@ -517,7 +517,7 @@ export default function Home() {
                             <span className="badge bg-secondary" style={{fontSize: '0.6rem'}}>HEMAT</span>
                         </div>
                         <h6 className="text-white fw-bold mb-0" style={{fontSize: '0.8rem'}}>100 Followers</h6>
-                        <small className="text-secondary" style={{fontSize: '0.7rem'}}>Cuma Rp 2.500</small>
+                        <small className="text-secondary" style={{fontSize: '0.7rem'}}>Cuma Rp 3.000</small>
                     </div>
                     <div className="quick-card border-gradient-2" onClick={() => callGlobal('applyBundle', 'TikTok Likes', 500)}>
                         <div className="d-flex align-items-center mb-1">
