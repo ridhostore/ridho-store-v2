@@ -202,21 +202,31 @@ const RidhoStoreApp = (function() {
         }
     };
 
-    // --- DATABASE ---
-    const serviceDatabase = [
-        { id: 1, category: 'instagram', name: 'IG Followers Mix (Less Drop)', price: 25000, desc: 'Akun campur global, garansi 30 hari refill.' },
-        { id: 2, category: 'instagram', name: 'IG Followers Indo (Real)', price: 60000, desc: 'Akun Indonesia asli aktif, interaksi tinggi.' },
-        { id: 3, category: 'instagram', name: 'IG Likes (Non-Drop)', price: 35000, desc: 'Likes permanen untuk foto/video.' },
-        { id: 4, category: 'instagram', name: 'IG Views (Reels)', price: 2000, desc: 'Views instan untuk video Reels.' },
-        { id: 5, category: 'instagram', name: 'IG Comments (Custom)', price: 75000, desc: 'Komentar sesuai request.' },
-        { id: 6, category: 'instagram', name: 'IG Story Views', price: 5000, desc: 'Views story cepat masuk.' },
-        { id: 7, category: 'tiktok', name: 'TikTok Followers', price: 30000, desc: 'Followers bot high quality.' },
-        { id: 8, category: 'tiktok', name: 'TikTok Likes', price: 20000, desc: 'Likes cepat masuk.' },
-        { id: 9, category: 'tiktok', name: 'TikTok Views (FYP)', price: 1000, desc: 'Membantu video masuk FYP.' },
-        { id: 10, category: 'tiktok', name: 'TikTok Shares', price: 5000, desc: 'Share video ke wa/link.' },
-        { id: 11, category: 'shopee', name: 'Shopee Followers Toko', price: 50000, desc: 'Meningkatkan kredibilitas toko.' },
-        { id: 12, category: 'shopee', name: 'Shopee Likes Produk', price: 40000, desc: 'Likes pada produk jualan.' }
-    ];
+    // --- DATABASE (MODIFIKASI SUPABASE) ---
+    // Kita buat array kosong dulu, nanti diisi otomatis dari Server
+    let serviceDatabase = [];
+
+    // Fungsi untuk mengambil data dari Supabase via API Next.js
+    const fetchServices = async () => {
+        try {
+            // Panggil API yang tadi kita buat
+            const response = await fetch('/api/services');
+            const data = await response.json();
+
+            if (Array.isArray(data) && data.length > 0) {
+                // Update database lokal dengan data dari server
+                serviceDatabase = data;
+                
+                // Render ulang tampilan agar harga terbaru muncul
+                UI.renderServices(); 
+                console.log("✅ Data Layanan Berhasil Dimuat dari Supabase!");
+            } else {
+                console.warn("⚠️ Data dari server kosong, menggunakan fallback.");
+            }
+        } catch (error) {
+            console.error("❌ Gagal mengambil data layanan:", error);
+        }
+    };
 
     // --- STATE ---
     let state = { activeDiscount: 0, selectedCategory: null, exitIntentShown: false };
@@ -591,19 +601,26 @@ const RidhoStoreApp = (function() {
     // --- PUBLIC API ---
     return {
         init: () => {
+            // 1. PANGGIL DATA DULUAN (INI YANG BARU)
+            fetchServices();
+
+            // 2. Event Listeners & Preloader
             window.addEventListener('load', Utils.hidePreloader);
             setTimeout(Utils.hidePreloader, 3000); 
             document.addEventListener('contextmenu', event => event.preventDefault());
 
+            // 3. Efek Visual
             UI.loadParticles(); 
             UI.initSwiper(); 
-            UI.renderServices();
+            // UI.renderServices() <-- HAPUS BARIS INI (Biar gak kedip, karena sudah dipanggil di fetchServices)
+
+            // 4. Fitur Lain
             Features.startFakeNotif(); 
             Features.startCountdown(); 
             Features.exitIntent();
             ReferralSystem.init();
 
-            // Fitur 1: Smart Form (Auto Fill WA)
+            // Fitur Smart Form
             const savedWA = localStorage.getItem('user_wa');
             const inputWA = document.getElementById('inputWhatsapp');
             if (savedWA && inputWA) {
@@ -614,11 +631,7 @@ const RidhoStoreApp = (function() {
             if(typeof Typed !== 'undefined') {
                 new Typed('#typing-text', {
                     strings: ['Followers IG', 'Likes TikTok', 'Branding Digital', 'Shopee Likes'],
-                    typeSpeed: 50,
-                    backSpeed: 30,
-                    backDelay: 2000,
-                    loop: true,
-                    showCursor: false 
+                    typeSpeed: 50, backSpeed: 30, backDelay: 2000, loop: true, showCursor: false 
                 });
             }
 
@@ -633,18 +646,12 @@ const RidhoStoreApp = (function() {
 
             // AOS Animation
             if(typeof AOS !== 'undefined') {
-                AOS.init({
-                    duration: 800,
-                    once: true,
-                    offset: 100,
-                    easing: 'ease-out-cubic'
-                });
-                
+                AOS.init({ duration: 800, once: true, offset: 100, easing: 'ease-out-cubic' });
             }
             RidhoStoreApp.initPWA();
-            
         },
-        // --- FITUR 1: PWA INSTALLER ---
+        
+        // --- FITUR LAIN (PUBLIC) ---
         initPWA: () => {
             let deferredPrompt;
             const installBtn = document.getElementById('installAppBtn');
@@ -668,13 +675,10 @@ const RidhoStoreApp = (function() {
                 });
             }
         },
-
-        // --- FITUR 2: DOWNLOAD STRUK GAMBAR ---
         downloadReceipt: () => {
-            const receiptArea = document.querySelector('.live-receipt'); // Area yang mau difoto
+            const receiptArea = document.querySelector('.live-receipt'); 
             if(!receiptArea) return;
 
-            // Efek visual loading
             Swal.fire({
                 title: 'Mencetak Struk...',
                 timerProgressBar: true,
@@ -683,10 +687,9 @@ const RidhoStoreApp = (function() {
             });
 
             html2canvas(receiptArea, {
-                backgroundColor: '#1a1a1a', // Sesuaikan warna background struk
-                scale: 2 // Supaya tajam (HD)
+                backgroundColor: '#1a1a1a', 
+                scale: 2 
             }).then(canvas => {
-                // Buat link download palsu
                 const link = document.createElement('a');
                 link.download = `Struk-RidhoStore-${Date.now()}.jpg`;
                 link.href = canvas.toDataURL("image/jpeg");
@@ -696,13 +699,13 @@ const RidhoStoreApp = (function() {
                 Swal.fire({ icon: 'success', title: 'Tersimpan!', text: 'Struk berhasil didownload.', background: '#1e1e1e', color: '#fff', toast: true, position: 'top' });
             });
         },
+        
         selectCategory: OrderSystem.selectCategory,
         calcTotal: OrderSystem.calcTotal,
         submitOrder: OrderSystem.submitOrder,
         checkOrderStatus: OrderSystem.checkOrderStatus,
         applyPromo: OrderSystem.applyPromo,
         
-        // Fitur 3: Live Search (Exposed)
         searchServices: () => {
             const input = document.getElementById('serviceSearch');
             const keyword = input ? input.value : '';
@@ -724,29 +727,21 @@ const RidhoStoreApp = (function() {
             });
         },
         
-        // --- BAGIAN YANG DIPERBAIKI ---
         preselectService: (cat, name) => {
-            // 1. Scroll ke form order
             const orderSection = document.getElementById('order');
             orderSection.scrollIntoView({ behavior: 'smooth' });
 
-            // 2. Klik kategori tab agar dropdown ke-reset sesuai kategori
             const selectorMap = { 'instagram': 0, 'tiktok': 1, 'shopee': 2 };
             const selectors = document.querySelectorAll('.selector-item');
             
             if(selectors[selectorMap[cat]]) {
                 selectors[selectorMap[cat]].click();
 
-                // 3. Tunggu sebentar sampai dropdown di-render ulang
                 setTimeout(() => {
                     const select = document.getElementById('inputService');
-                    // Pilih layanan yang spesifik
                     select.value = name;
-                    
-                    // Hitung total (jika ada quantity yg tertinggal, atau reset 0)
                     OrderSystem.calcTotal();
 
-                    // Feedback Sukses
                     const Toast = Swal.mixin({
                         toast: true, position: 'top-end', showConfirmButton: false, timer: 2000, background: '#1e1e1e', color: '#fff'
                     });
@@ -754,7 +749,6 @@ const RidhoStoreApp = (function() {
                 }, 300);
             }
         },
-        // --- AKHIR BAGIAN YANG DIPERBAIKI ---
 
         openHistory: () => {
             HistoryManager.load();
@@ -781,16 +775,12 @@ const RidhoStoreApp = (function() {
     };
 })();
 
-// ... (Kode RidhoStoreApp di atas biarkan) ...
-
-// INI BAGIAN PENTING DI BAWAH:
+// --- GLOBAL EXPOSE (Agar bisa dipanggil dari HTML) ---
 document.addEventListener("DOMContentLoaded", RidhoStoreApp.init);
 
-// Force Expose ke Window agar Next.js bisa baca
 if (typeof window !== 'undefined') {
     window.RidhoStoreApp = RidhoStoreApp;
     
-    // Expose fungsi global lainnya untuk tombol-tombol HTML lama
     window.selectCategory = RidhoStoreApp.selectCategory;
     window.selectPayment = RidhoStoreApp.selectPayment; 
     window.calcTotal = RidhoStoreApp.calcTotal;
