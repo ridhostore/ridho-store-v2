@@ -1,4 +1,4 @@
-/* FILE: assets/css/style.css (Original Restored) */
+/* FILE: assets/css/style.css */
 
 /* 1. ROOT VARIABLES & DESIGN TOKENS */
 :root {
@@ -45,7 +45,6 @@ body {
     background: radial-gradient(circle at 50% 0%, #1f2024 0%, #000000 85%);
     background-attachment: fixed;
     color: var(--text-main); 
-    /* Font akan di-handle oleh Next.js di layout.tsx, tapi kita set fallback */
     font-family: 'Plus Jakarta Sans', sans-serif; 
     line-height: 1.6; 
     overflow-x: hidden; 
@@ -54,7 +53,6 @@ body {
     margin: 0; padding: 0;
 }
 
-/* Reset typography warna agar tidak abu-abu (masalah Tailwind) */
 h1, h2, h3, h4, h5, h6 { color: #FFFFFF; font-weight: 700; letter-spacing: -0.02em; margin-bottom: 1rem; }
 h1 { font-size: clamp(2rem, 6vw, 4rem); line-height: 1.1; }
 h2 { font-size: clamp(1.5rem, 4vw, 2.5rem); }
@@ -653,3 +651,60 @@ ul { list-style: none; padding: 0; margin: 0; }
 
 .no-scrollbar::-webkit-scrollbar { display: none; }
 .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* --- FIX TABRAKAN STICKY BAR (NEW) --- */
+/* Target elemen melayang: WA Button, History Button, Install Button, dll */
+.float-wa, 
+.floating-btn, 
+#installAppBtn,
+.back-to-top,
+.btn-history-float {
+    transition: bottom 0.3s ease-in-out; /* Animasi perpindahan posisi */
+    z-index: 99;
+}
+
+/* Jika class 'has-sticky-bar' aktif di body, naikkan posisi tombol */
+body.has-sticky-bar .float-wa {
+    bottom: 220px !important; /* WA naik tinggi supaya aman */
+}
+
+body.has-sticky-bar .btn-history-float {
+    bottom: 160px !important; /* History di bawah WA dikit */
+}
+
+body.has-sticky-bar #installAppBtn {
+    bottom: 280px !important;
+}
+
+/* Pastikan Bar Total Bayar selalu paling depan */
+#stickyBar {
+    z-index: 999 !important;
+}
+
+/* --- FIX FULL PAGE BACKGROUND (PARTICLES) --- */
+#particles-js {
+    position: fixed;      /* Kunci posisi biar menempel di layar */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;         /* Paksa tinggi 100% layar */
+    z-index: 0;          /* Taruh di layer paling bawah (di atas body, di bawah konten) */
+    pointer-events: none; /* Supaya bisa diklik tembus (gak ngehalangin tombol) */
+}
+
+/* Pastikan konten website ada DI ATAS background */
+.hero-section, 
+.container, 
+nav, 
+footer, 
+.flash-sale-banner {
+    position: relative;
+    z-index: 1; /* Konten harus lebih tinggi dari 0 */
+}
+
+/* Pastikan body warnanya pas */
+body {
+    /* Gradient tetap ada sebagai dasar kalau particles telat loading */
+    background: radial-gradient(circle at 50% 0%, #1f2024 0%, #000000 85%);
+    background-attachment: fixed;
+}

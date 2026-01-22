@@ -400,13 +400,20 @@ const RidhoStoreApp = (function() {
                     if(receiptDiscount) receiptDiscount.innerText = discount > 0 ? `-Rp ${Utils.formatRupiah(Math.ceil(discount)).replace('Rp', '')}` : '-Rp 0';
                     if(receiptTotal) receiptTotal.innerText = formattedTotal;
                     if(stickyTotal) stickyTotal.innerText = formattedTotal;
+                    
                     if(stickyBar) stickyBar.style.display = 'flex';
+                    // 1. TAMBAHAN BARU: Beri tanda ke Body kalau Sticky Bar muncul
+                    document.body.classList.add('has-sticky-bar');
+
                     if(displayTotalInput) displayTotalInput.value = Math.ceil(total); 
                 }
             } else {
                 if(receiptService) receiptService.innerText = '-';
                 if(receiptTotal) receiptTotal.innerText = 'Rp 0';
+                
                 if(stickyBar) stickyBar.style.display = 'none';
+                // 2. TAMBAHAN BARU: Hapus tanda kalau Sticky Bar hilang
+                document.body.classList.remove('has-sticky-bar');
             }
         },
 
